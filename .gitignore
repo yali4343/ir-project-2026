@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.DS_Store
+__MACOSX/
+requirements.txt
+*.pdf
+venv/
+.env
+*.key
+*.json
+!data/*.json
+!src/*.json
+
