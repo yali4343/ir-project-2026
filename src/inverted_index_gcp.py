@@ -72,14 +72,19 @@ class MultiFileWriter:
 class MultiFileReader:
     """ Sequential binary reader of multiple files of up to BLOCK_SIZE each. """
     def __init__(self, base_dir, bucket_name=None):
-        self._base_dir = Path(base_dir)
+        self._base_dir = base_dir # Keep as string or Path depending on usage
         self._bucket = None if bucket_name is None else get_bucket(bucket_name)
         self._open_files = {}
 
     def read(self, locs, n_bytes):
         b = []
         for f_name, offset in locs:
-            f_name = str(self._base_dir / f_name)
+            if self._bucket:
+                # Force forward slashes for GCS
+                f_name = f"{self._base_dir}/{f_name}"
+            else:
+                f_name = str(Path(self._base_dir) / f_name)
+                
             if f_name not in self._open_files:
                 self._open_files[f_name] = _open(f_name, 'rb', self._bucket)
             f = self._open_files[f_name]
@@ -210,7 +215,12 @@ class InvertedIndex:
 
     @staticmethod
     def read_index(base_dir, name, bucket_name=None):
-        path = str(Path(base_dir) / f'{name}.pkl')
+        # Handle GCS paths (force forward slashes)
+        if bucket_name:
+            path = f"{base_dir}/{name}.pkl"
+        else:
+            path = str(Path(base_dir) / f'{name}.pkl')
+            
         bucket = None if bucket_name is None else get_bucket(bucket_name)
         with _open(path, 'rb', bucket) as f:
             return pickle.load(f)

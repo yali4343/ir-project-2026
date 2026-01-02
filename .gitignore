@@ -1,13 +1,26 @@
+# Python
 __pycache__/
 *.pyc
-.DS_Store
-__MACOSX/
-requirements.txt
-*.pdf
+.venv/
 venv/
 .env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+__MACOSX/
+
+# Project Specific - Ignore original unzipped folder and data
+ir_proj_20251213/
+data/
 *.key
-*.json
-!data/*.json
-!src/*.json
+*.pdf
+
+# Secrets
+extreme-wind-480314-f5-e88363037125.json
+
+# Allow requirements
+!requirements.txt
 
