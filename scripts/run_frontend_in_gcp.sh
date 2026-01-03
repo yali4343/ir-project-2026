@@ -1,9 +1,9 @@
 INSTANCE_NAME="instance-1"
 REGION=us-central1
 ZONE=us-central1-c
-PROJECT_NAME="YOUR_PROJECT_NAME_HERE"
+PROJECT_NAME="extreme-wind-480314-f5"
 IP_NAME="$PROJECT_NAME-ip"
-GOOGLE_ACCOUNT_NAME="YOUR_ACCOUNT_NAME_HERE" # without the @post.bgu.ac.il or @gmail.com part
+GOOGLE_ACCOUNT_NAME="yalik" # without the @post.bgu.ac.il or @gmail.com part
 
 # 0. Install Cloud SDK on your local machine or using Could Shell
 # check that you have a proper active account listed
@@ -68,7 +68,7 @@ curl "http://127.0.0.1:8080/search?query=hello"
 
 ################################################################################
 # Clean up commands to undo the above set up and avoid unnecessary charges
-gcloud compute instances delete -q $INSTANCE_NAME
+gcloud compute instances delete -q $INSTANCE_NAME --zone=$ZONE
 # make sure there are no lingering instances
 gcloud compute instances list
 delete firewall rule

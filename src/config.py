@@ -6,8 +6,4 @@ class Config:
     # Path to the service account key file (assumed to be in the project root)
     KEY_FILE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'extreme-wind-480314-f5-e88363037125.json'))
     
-    # Partner Details
-    PARTNER_1_NAME = 'Yali Katz'
-    PARTNER_1_ID = '211381009'
-    PARTNER_2_NAME = 'Amit Dvash'
-    PARTNER_2_ID = '316127653'
+    
