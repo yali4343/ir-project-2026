@@ -158,6 +158,17 @@ def calculate_tfidf_score(query_tokens, index):
     # If local, adjust base_dir to include 'data/'
     if bucket_name is None:
         base_dir = os.path.join('data', base_dir)
+        # Check if bin files actually exist locally. If they are missing (we only have index.pkl),
+        # we must fall back to the bucket for reading the posting lists.
+        try:
+            if os.path.isdir(base_dir) and not any(f.endswith('.bin') for f in os.listdir(base_dir)):
+                print(f"Local index found but .bin files are missing in {base_dir}. Switching to bucket for posting lists.")
+                bucket_name = Config.BUCKET_NAME
+                base_dir = 'postings_gcp'
+        except Exception as e:
+            print(f"Error checking local bin files: {e}. Defaulting to bucket.")
+            bucket_name = Config.BUCKET_NAME
+            base_dir = 'postings_gcp'
 
     for token, w_iq in query_weights.items():
         # Read posting list for this token
@@ -226,6 +237,38 @@ def search():
     if len(query) == 0:
       return jsonify(res)
     # BEGIN SOLUTION
+    
+    # 1. Tokenize
+    query_tokens = tokenize(query)
+    
+    # 2. Get Scores from Body and Title
+    # We use a simple linear combination: Score = 0.5 * Body + 0.5 * Title
+    # This usually provides better MAP than body alone.
+    
+    scores = Counter()
+    
+    # Body Scores
+    if index_body:
+        body_results = calculate_tfidf_score(query_tokens, index_body)
+        for doc_id, score in body_results:
+            scores[doc_id] += score
+            
+    # Title Scores (Boost quality)
+    if index_title:
+        title_results = calculate_tfidf_score(query_tokens, index_title)
+        for doc_id, score in title_results:
+            scores[doc_id] += score 
+
+    # 3. Sort and Format
+    # Get top 100
+    top_100 = scores.most_common(100)
+    
+    # Map to (id, title)
+    for doc_id, score in top_100:
+        # id_to_title keys might be int or str, index returns int. 
+        # We assume int keys for consistency with standard pipelines.
+        title = id_to_title.get(doc_id, str(doc_id))
+        res.append((str(doc_id), title))
 
     # END SOLUTION
     return jsonify(res)

@@ -1,0 +1,222 @@
+body {
+  direction: rtl;
+  text-align: right; /* Ensures text alignment is also RTL */
+}
+
+/* Print-specific styles for better black and white contrast */
+@media print {
+  /* Ensure all text is black for better contrast */
+  * {
+    color: black !important;
+    background: white !important;
+  }
+
+  /* Strong contrast for code elements */
+  code,
+  pre,
+  kbd,
+  samp {
+    color: black !important;
+    background: #f5f5f5 !important;
+    border: 1px solid #ccc !important;
+  }
+
+  /* Make inline code stand out with darker background */
+  code {
+    background: #e8e8e8 !important;
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
+  }
+
+  /* Ensure headings are properly contrasted */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: black !important;
+    font-weight: bold !important;
+  }
+
+  /* Make sure links are visible in print */
+  a {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+
+  /* Ensure table borders are visible */
+  table,
+  th,
+  td {
+    border: 1px solid black !important;
+  }
+
+  /* Make strong and bold text more prominent */
+  strong,
+  b {
+    color: black !important;
+    font-weight: bold !important;
+  }
+
+  /* Ensure emphasized text is visible */
+  em,
+  i {
+    color: black !important;
+    font-style: italic !important;
+  }
+}
+
+/* General high contrast rules for better readability */
+code,
+pre,
+kbd,
+samp {
+  color: #333 !important;
+  background: #f8f8f8 !important;
+  border: 1px solid #ddd !important;
+}
+
+p,
+li {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Keep code blocks LTR as they often contain English/code */
+pre,
+code {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Comprehensive LTR rules for all code elements */
+code,
+pre,
+.language-java,
+.language-ocl,
+.language-javascript,
+.language-sql,
+pre code,
+code pre,
+div code,
+p code,
+li code,
+td code,
+th code,
+span code,
+div pre,
+p pre,
+li pre,
+td pre,
+th pre,
+.highlight,
+.codehilite,
+[class*="language-"],
+[class*="lang-"],
+*[class*="java"],
+*[class*="ocl"] {
+  direction: ltr !important;
+  text-align: left !important;
+  font-family: "Courier New", Consolas, Monaco, "Lucida Console", monospace !important;
+  unicode-bidi: embed !important;
+  writing-mode: horizontal-tb !important;
+}
+
+/* Force LTR even within RTL containers */
+div[dir="rtl"] code,
+div[dir="rtl"] pre,
+div[dir="rtl"] pre code {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: embed !important;
+}
+
+/* Prevent page breaks inside code blocks, tables, and figures */
+pre,
+table,
+figure {
+  page-break-inside: avoid;
+}
+
+/* Prevent page breaks after headings and before the content that follows them */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  page-break-after: avoid;
+}
+
+/* More specific: try to keep a heading and the immediately following paragraph or list together */
+h1 + p,
+h1 + ul,
+h1 + ol,
+h1 + div, /* Added to keep content within a div together with the heading */
+h2 + p,
+h2 + ul,
+h2 + ol,
+h2 + div, /* Added to keep content within a div together with the heading */
+h3 + p,
+h3 + ul,
+h3 + ol,
+h3 + div, /* Added to keep content within a div together with the heading */
+h4 + p,
+h4 + ul,
+h4 + ol,
+h4 + div, /* Added to keep content within a div together with the heading */
+h5 + p,
+h5 + ul,
+h5 + ol,
+h5 + div, /* Added to keep content within a div together with the heading */
+h6 + p,
+h6 + ul,
+h6 + ol,
+h6 + div /* Added to keep content within a div together with the heading */ {
+  page-break-before: avoid;
+}
+
+/* Attempt to keep a heading and its subsequent content (including <br> tags and lists/paragraphs) together */
+div > h1,
+div > h2,
+div > h3,
+div > h4,
+div > h5,
+div > h6 {
+  page-break-inside: avoid; /* Try to keep the heading and its immediate content on the same page */
+}
+
+/* General rule to avoid breaking elements that are meant to be grouped */
+div[dir="rtl"] > h2,
+div[dir="rtl"] > ul,
+div[dir="rtl"] > p {
+  page-break-inside: avoid;
+}
+
+/* Ensure that a heading and the block of content immediately following it (which might include <br> tags) are kept together. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  page-break-after: avoid !important; /* Try harder to prevent breaks after headings */
+}
+
+/* Group a heading with the next element, which could be a list, paragraph, or a block of <br> tags followed by content */
+h1 + *,
+h2 + *,
+h3 + *,
+h4 + *,
+h5 + *,
+h6 + * {
+  page-break-before: avoid !important; /* Try harder to prevent breaks before the content following a heading */
+}
+
+/* This is a more general approach to keep sections together.
+   Wrap sections in a div with a specific class if more control is needed.
+   For now, this tries to keep any direct children of the main div from breaking internally. */
+div[dir="rtl"] > * {
+  page-break-inside: avoid;
+}

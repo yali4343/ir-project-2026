@@ -1,0 +1,8 @@
+{
+    "experiment": "v1_baseline_body_title",
+    "date": "2026-01-06T16:23:30.533410",
+    "mean_latency": 11.177944413820903,
+    "map": 0.1263465185909171,
+    "mean_p10": 0.3466666666666667,
+    "num_queries": 30
+}
