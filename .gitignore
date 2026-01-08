@@ -24,3 +24,16 @@ extreme-wind-480314-f5-e88363037125.json
 # Allow requirements
 !requirements.txt
 
+
+# readmes/
+readmes/
+
+# Confidential config
+config.py
+*config*.py
+.env
+
+# Data
+data/queries_train.json
+data/queries_train_split.json
+data/queries_validation_split.json

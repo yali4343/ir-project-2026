@@ -1,0 +1,8 @@
+{
+    "experiment": "baseline_validation",
+    "date": "2026-01-08T16:05:43.011543",
+    "mean_latency": 20.454950213432312,
+    "map": 0.17324821009278202,
+    "mean_p10": 0.38333333333333336,
+    "num_queries": 6
+}

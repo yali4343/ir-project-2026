@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 # --- Configuration ---
-QUERIES_FILE = 'data/queries_train.json'
+QUERIES_FILE = 'data/queries_validation_split.json'
 SEARCH_URL = 'http://localhost:8080/search'
 OUTPUT_DIR = 'experiments'
-EXPERIMENT_NAME = 'v1_baseline_body_title'
+EXPERIMENT_NAME = 'baseline_validation'
 
 # --- Metrics Calculation ---
 

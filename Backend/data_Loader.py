@@ -11,28 +11,30 @@ def load_index(index_type):
     """
     Load an inverted index based on type ('text', 'title', 'anchor').
     """
-    # All indices are now in data/postings_gcp as per instructions
-    local_base_dir = 'data/postings_gcp' 
-    bucket_base_dir = 'postings_gcp'
-    
-    name_map = {
-        'text': 'text_index',
-        'title': 'title_index',  
-        'anchor': 'anchor_index'
+    # Specific directories for each index type
+    dir_map = {
+        'text': 'data/postings_gcp',
+        'title': 'data/postings_title',
+        'anchor': 'data/postings_anchor'
     }
     
-    if index_type not in name_map:
+    if index_type not in dir_map:
         raise ValueError(f"Unknown index type: {index_type}")
         
-    name = name_map[index_type]
-    print(f"Loading {index_type} index ({name})...")
+    local_base_dir = dir_map[index_type]
+    bucket_base_dir = 'postings_gcp' if index_type == 'text' else f'postings_{index_type}'
+    
+    # The file is always named 'index' (loading index.pkl)
+    name = 'index'
+    
+    print(f"Loading {index_type} index from {local_base_dir}...")
     
     # Try local first
     try:
         return InvertedIndex.read_index(local_base_dir, name)
     except Exception as e:
-        print(f"Could not load local index {name}: {e}")
-        # Try bucket
+        print(f"Could not load local index {name} from {local_base_dir}: {e}")
+        # Try bucket (only works for text currently as title/anchor are not in bucket)
         try:
             return InvertedIndex.read_index(bucket_base_dir, name, Config.BUCKET_NAME)
         except Exception as e2:
