@@ -7,4 +7,6 @@ class Config:
     # Adjusted to look in the 'data' directory relative to project root
     KEY_FILE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data', 'extreme-wind-480314-f5-e88363037125.json'))
     
+    POSTING_GCP='gs://yali-ir2025-bucket/posting_gcp/index.pkl'
+    ID_TO_TITLE_PARQUET_DIR = "gs://yali-ir2025-bucket/mappings/id_to_title_parquet/"
     

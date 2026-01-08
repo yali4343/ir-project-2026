@@ -5,10 +5,10 @@ import math
 
 class SearchEngine:
     def __init__(self):
-        print("Initializing Search Engine...")
+        print("Initializing Search Engine (Minimum Requirements)...")
         self.text_index = load_index('text')
-        self.title_index = load_index('title')
-        self.anchor_index = load_index('anchor')
+        # self.title_index = load_index('title') # Removed
+        # self.anchor_index = load_index('anchor') # Removed
         self.pagerank = load_pagerank()
         self.pageviews = load_pageviews()
         self.id_to_title = load_id_to_title()
@@ -16,26 +16,17 @@ class SearchEngine:
         
     def search(self, query):
         """
-        Combined search using all indices.
-        Improved with weights and PageRank interaction.
+        Combined search using only Body index and PageRank (Minimum Requirements).
         """
         tokens = tokenize(query)
-        if hasattr(self, '_expand_query'):
-            # Placeholder for query expansion if we implement it
-            pass
-
         scores = {}
         
         # 1. Weights & Config
-        w_text = 0.3
-        w_title = 0.4
-        w_anchor = 0.3
-        w_pr = 0.5 
+        w_text = 0.85
+        w_pr = 0.15
         
-        # 2. Results from indices
+        # 2. Results from indices (Only Text)
         text_res = calculate_tfidf_score_with_dir(tokens, self.text_index, 'postings_gcp')
-        title_res = calculate_tfidf_score_with_dir(tokens, self.title_index, 'postings_title')
-        anchor_res = calculate_tfidf_score_with_dir(tokens, self.anchor_index, 'postings_anchor')
         
         # Helper to normalize
         def normalize(results):
@@ -45,11 +36,9 @@ class SearchEngine:
             return {doc_id: score / max_score for doc_id, score in results}
 
         norm_text = normalize(text_res)
-        norm_title = normalize(title_res)
-        norm_anchor = normalize(anchor_res)
         
-        # Union of all doc_ids
-        all_ids = set(norm_text.keys()) | set(norm_title.keys()) | set(norm_anchor.keys())
+        # Union of all doc_ids (Only Text)
+        all_ids = set(norm_text.keys())
 
         # --- Index Elimination (Chapter 7.1.2) ---
         # Refine candidates by requiring minimum term overlap in Body
@@ -65,44 +54,37 @@ class SearchEngine:
                 if count >= min_match:
                     filtered_ids.add(doc_id)
             
-            # Intersect with existing candidates
-            # Note: doc_ids in text_res are int/str? 
-            # In calculate_unique_term_count, it returns what reads from index (int).
-            # normalize keys are same.
-            
             if filtered_ids:
-               # Only apply filter if we haven't eliminated everything
-               # (Safety fallback)
-               all_ids = all_ids.intersection(filtered_ids)
+                all_ids = all_ids.intersection(filtered_ids)
              
-        # Debugging: Print stats for first query call
-        if not hasattr(self, '_debug_printed'):
-            print(f"DEBUG: Query='{query}' Tokens={tokens} Candidates={len(all_ids)}")
-            if all_ids:
-                sample_id = list(all_ids)[0]
-                print(f"Sample Doc {sample_id} -> Text:{norm_text.get(sample_id,0):.3f} Title:{norm_title.get(sample_id,0):.3f} Anchor:{norm_anchor.get(sample_id,0):.3f}")
-            self._debug_printed = True
-
         # 4. Integrate PageRank
+        # Pre-calculated Min/Max Log(PR+1) from data analysis
+        min_log_pr = 0.14
+        max_log_pr = 9.2
+        
         for doc_id in all_ids:
-            score = 0
-            score += norm_text.get(doc_id, 0) * w_text
-            score += norm_title.get(doc_id, 0) * w_title
-            score += norm_anchor.get(doc_id, 0) * w_anchor
+            text_score = norm_text.get(doc_id, 0)
             
             pr_val = self.pagerank.get(doc_id, 0)
-            try:
-                # Log scale PR
-                score += w_pr * math.log(pr_val + 1)
-            except:
-                pass
+            # Normalize PR to [0, 1] range
+            log_pr = math.log(pr_val + 1)
+            norm_pr = (log_pr - min_log_pr) / (max_log_pr - min_log_pr)
+            # Clamp to [0,1] just in case
+            norm_pr = max(0.0, min(1.0, norm_pr))
             
-            scores[doc_id] = score
+            # Combined score
+            scores[doc_id] = (w_text * text_score) + (w_pr * norm_pr)
 
         # Format results
         final_res = []
         for doc_id, score in sorted(scores.items(), key=lambda x: x[1], reverse=True)[:100]:
-            title = self.id_to_title.get(doc_id, str(doc_id))
+            title = None
+            try:
+                title = self.id_to_title.get(int(doc_id))
+            except:
+                pass
+            if title is None:
+                title = self.id_to_title.get(doc_id, str(doc_id))
             final_res.append((str(doc_id), title))
             
         return final_res
@@ -113,39 +95,21 @@ class SearchEngine:
         return self._format(res)
         
     def search_title(self, query):
-        tokens = tokenize(query)
-        # Requirement: Descending order of DISTINCT query words.
-        # This sounds like the search_anchor/search_title special requirement.
-        # The prompt only specified it explicitly for ANCHOR ("search_anchor behavior").
-        # For Title, Chapter 7 mentions "Inexact Top K".
-        # However, checking the Forum Clarifications block in prompt:
-        # "search_anchor must ... Rank documents by the number of UNIQUE query words"
-        # It doesn't explicitly force this for search_title, BUT existing search_title docstring says:
-        # "ordered in descending order of the NUMBER OF DISTINCT QUERY WORDS"
-        # So I should use the same logic for Title as well!
-        res = calculate_unique_term_count(tokens, self.title_index, 'postings_title')
-        return self._format(res)
+        return []
 
     def search_anchor(self, query):
-        tokens = tokenize(query)
-        # Requirement: Rank by number of UNIQUE query words.
-        res = calculate_unique_term_count(tokens, self.anchor_index, 'postings_anchor')
-        return self._format(res)
+        return []
         
     def _format(self, results):
         final_res = []
         for doc_id, score in sorted(results, key=lambda x: x[1], reverse=True)[:100]:
-            # Ensure doc_id is properly looked up (int vs str)
-            # Data loader returns int keys usually?
-            # pickle index stores int.
-            # id_to_title keys?
-            # Let's try int then str.
+            title = None
             try:
-                did_int = int(doc_id)
-                title = self.id_to_title.get(did_int, str(doc_id))
+                title = self.id_to_title.get(int(doc_id))
             except:
+                pass
+            if title is None:
                 title = self.id_to_title.get(doc_id, str(doc_id))
-                
             final_res.append((str(doc_id), title))
         return final_res
         

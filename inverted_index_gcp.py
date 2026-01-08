@@ -29,7 +29,11 @@ PROJECT_ID = Config.PROJECT_ID
 def get_bucket(bucket_name):
     if os.path.exists(Config.KEY_FILE_PATH):
         return storage.Client.from_service_account_json(Config.KEY_FILE_PATH).bucket(bucket_name)
-    return storage.Client(project=PROJECT_ID).bucket(bucket_name)
+    # Fallback to anonymous client if key is missing and default creds might fail
+    try:
+        return storage.Client.create_anonymous_client().bucket(bucket_name)
+    except:
+        return storage.Client(project=PROJECT_ID).bucket(bucket_name)
 
 def _open(path, mode, bucket=None):
     if bucket is None:
