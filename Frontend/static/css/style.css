@@ -1,0 +1,119 @@
+:root {
+    --primary-color: #2563eb;
+    --bg-color: #f8fafc;
+    --text-color: #1e293b;
+    --card-bg: #ffffff;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.main-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.search-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    margin-top: 2rem;
+}
+
+.logo {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap; /* Handle mobile */
+}
+
+input[type="text"] {
+    width: 100%;
+    max-width: 500px;
+    padding: 12px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+button {
+    padding: 12px 24px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #1d4ed8;
+}
+
+#results-list {
+    list-style: none;
+    padding: 0;
+}
+
+.result-item {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.1s;
+}
+
+.result-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.result-title {
+    font-size: 1.25rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.result-meta {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.hidden {
+    display: none;
+}
+
+#loading {
+    text-align: center;
+    color: #64748b;
+    margin-top: 2rem;
+}
+
+.no-results, .error {
+    text-align: center;
+    margin-top: 2rem;
+    color: #64748b;
+}

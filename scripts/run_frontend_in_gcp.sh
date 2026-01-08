@@ -18,7 +18,7 @@ gcloud config list
 gcloud compute addresses create $IP_NAME --project=$PROJECT_NAME --region=$REGION
 gcloud compute addresses list
 # note the IP address printed above, that's your extrenal IP address.
-INSTANCE_IP=$(gcloud compute addresses describe $IP_NAME --region=$REGION --format="get(address)")
+INSTANCE_IP="34.170.174.45"
 
 # 2. Create Firewall rule to allow traffic to port 8080 on the instance
 gcloud compute firewall-rules create default-allow-http-8080 \
@@ -52,13 +52,13 @@ gcloud compute scp ./search_frontend.py \
 gcloud compute ssh $GOOGLE_ACCOUNT_NAME@$INSTANCE_NAME --zone $ZONE
 
 # 6. Verify the enviroment is all set (run in the VM)
-# ~/venv/bin/python - << 'PY'
-# import flask, werkzeug, numpy, pandas
-# print("flask:", flask.__version__)
-# print("werkzeug:", werkzeug.__version__)
-# print("numpy:", numpy.__version__)
-# print("pandas:", pandas.__version__)
-# PY
+~/venv/bin/python - << 'PY'
+import flask, werkzeug, numpy, pandas
+print("flask:", flask.__version__)
+print("werkzeug:", werkzeug.__version__)
+print("numpy:", numpy.__version__)
+print("pandas:", pandas.__version__)
+PY
 
 # 7. Run the server
 nohup ~/venv/bin/python ~/search_frontend.py > ~/frontend.log 2>&1 &

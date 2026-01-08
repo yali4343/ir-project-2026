@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki Search 2025</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <header class="search-header">
+            <h1 class="logo">Search Engine</h1>
+            <div class="search-box">
+                <input type="text" id="query" placeholder="Type to search..." autofocus>
+                <button id="search-btn">Search</button>
+            </div>
+        </header>
+
+        <main id="results-area">
+            <div id="loading" class="hidden">Searching...</div>
+            <ul id="results-list"></ul>
+        </main>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
