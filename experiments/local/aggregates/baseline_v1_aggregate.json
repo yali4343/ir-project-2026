@@ -1,0 +1,16 @@
+{
+    "version": "baseline_v1",
+    "timestamp": "2026-01-09T17:36:37.744696",
+    "num_runs": 3,
+    "mean_p10_avg": 0.35000000000000003,
+    "mean_p10_std": 0.11785113019775789,
+    "mean_ap10_avg": 0.2686199294532628,
+    "mean_ap10_std": 0.12027638227568406,
+    "mean_latency_avg": 19528.238336245216,
+    "mean_latency_std": 4423.596719769295,
+    "runs_included": [
+        "baseline_v1_run1",
+        "baseline_v1_run2",
+        "baseline_v1_run3"
+    ]
+}

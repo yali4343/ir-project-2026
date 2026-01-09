@@ -5,7 +5,7 @@ import math
 
 class SearchEngine:
     def __init__(self):
-        print("Initializing Search Engine (Minimum Requirements)...")
+        print("Initializing Search Engine")
         self.text_index = load_index('text')
         # self.title_index = load_index('title') # Removed
         # self.anchor_index = load_index('anchor') # Removed
@@ -16,7 +16,7 @@ class SearchEngine:
         
     def search(self, query):
         """
-        Combined search using only Body index and PageRank (Minimum Requirements).
+        Combined search using only Body index and PageRank.
         """
         tokens = tokenize(query)
         scores = {}

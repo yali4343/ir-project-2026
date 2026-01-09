@@ -1,0 +1,6 @@
+{"query": "Gothic literature Mary Shelley", "p10": 0.2, "ap10": 0.16666666666666666, "latency": 15048.961639404297, "num_retrieved": 100, "num_relevant": 42}
+{"query": "Robotics automation industry", "p10": 0.4, "ap10": 0.27166666666666667, "latency": 14604.815006256104, "num_retrieved": 100, "num_relevant": 43}
+{"query": "Quantum computing future technology", "p10": 0.7, "ap10": 0.6042063492063492, "latency": 21173.980474472046, "num_retrieved": 100, "num_relevant": 37}
+{"query": "Mount Everest climbing expeditions", "p10": 0.7, "ap10": 0.5063095238095239, "latency": 15403.779983520508, "num_retrieved": 100, "num_relevant": 46}
+{"query": "Fossil fuels climate change", "p10": 0.3, "ap10": 0.19666666666666666, "latency": 15888.770341873169, "num_retrieved": 100, "num_relevant": 40}
+{"query": "Silk Road trade cultural exchange", "p10": 0.3, "ap10": 0.14999999999999997, "latency": 23447.72243499756, "num_retrieved": 100, "num_relevant": 47}

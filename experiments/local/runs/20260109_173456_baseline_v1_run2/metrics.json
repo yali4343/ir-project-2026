@@ -1,0 +1,10 @@
+{
+    "experiment": "baseline_v1_run2",
+    "timestamp": "2026-01-09T17:34:56.465340",
+    "num_queries": 6,
+    "mean_p10": 0.18333333333333335,
+    "mean_ap10": 0.10347222222222223,
+    "mean_latency": 25776.585181554157,
+    "seed": 43,
+    "split_ratio": 0.8
+}

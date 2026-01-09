@@ -1,0 +1,6 @@
+{"query": "Printing press invention Gutenberg", "p10": 0.6, "ap10": 0.4530952380952381, "latency": 18263.526439666748, "num_retrieved": 100, "num_relevant": 43}
+{"query": "Fossil fuels climate change", "p10": 0.3, "ap10": 0.19666666666666666, "latency": 15955.41763305664, "num_retrieved": 100, "num_relevant": 40}
+{"query": "Green Revolution agriculture yield", "p10": 0.0, "ap10": 0.0, "latency": 18516.265630722046, "num_retrieved": 100, "num_relevant": 49}
+{"query": "Impressionism Monet Renoir", "p10": 0.6, "ap10": 0.569047619047619, "latency": 10398.199319839478, "num_retrieved": 100, "num_relevant": 39}
+{"query": "Renaissance architecture Florence Italy", "p10": 0.4, "ap10": 0.4, "latency": 15264.639139175415, "num_retrieved": 100, "num_relevant": 46}
+{"query": "Renaissance art Leonardo da Vinci", "p10": 0.7, "ap10": 0.7, "latency": 18428.34424972534, "num_retrieved": 100, "num_relevant": 45}
