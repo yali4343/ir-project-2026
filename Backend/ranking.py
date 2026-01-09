@@ -13,12 +13,19 @@ def _get_posting_source(posting_list_dir):
     """
     base_dir = posting_list_dir
     bucket_name = Config.BUCKET_NAME
-    
+    index_source = os.environ.get('INDEX_SOURCE', 'auto')
+
+    # Force GCS if configured
+    if index_source == 'gcs':
+        return base_dir, bucket_name
+
+    # Otherwise check local
     local_path = os.path.join('data', base_dir)
-    if os.path.exists(local_path) and os.path.isdir(local_path):
-        has_bin = any(f.endswith('.bin') for f in os.listdir(local_path))
-        if has_bin:
-            return local_path, None
+    if index_source != 'gcs':
+        if os.path.exists(local_path) and os.path.isdir(local_path):
+            has_bin = any(f.endswith('.bin') for f in os.listdir(local_path))
+            if has_bin:
+                return local_path, None
     
     return base_dir, bucket_name
 

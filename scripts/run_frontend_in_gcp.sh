@@ -26,10 +26,10 @@ gcloud compute firewall-rules create default-allow-http-8080 \
   --source-ranges 0.0.0.0/0 \
   --target-tags http-server
 
-# 3. Create the instance. Change to a larger instance (larger than e2-micro) as needed.
+# 3. Create the instance. Use a machine with enough RAM for parquet + index loading.
 gcloud compute instances create $INSTANCE_NAME \
   --zone=$ZONE \
-  --machine-type=e2-micro \
+  --machine-type=e2-standard-2 \
   --network-interface=address=$INSTANCE_IP,network-tier=PREMIUM,subnet=default \
   --metadata-from-file startup-script=startup_script_gcp.sh \
   --scopes=https://www.googleapis.com/auth/cloud-platform \
@@ -64,7 +64,10 @@ PY
 nohup ~/venv/bin/python ~/search_frontend.py > ~/frontend.log 2>&1 &
 
 # 8. Start querying
-curl "http://127.0.0.1:8080/search?query=hello"
+curl "http://34.170.174.45:8080/search?query=Mount Everest climbing expeditions"
+
+# or open in your browser:
+34.170.174.45:8080/search?query=Mount Everest climbing expeditions
 
 ################################################################################
 # Clean up commands to undo the above set up and avoid unnecessary charges
