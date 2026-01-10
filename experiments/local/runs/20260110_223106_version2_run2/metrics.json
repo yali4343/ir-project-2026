@@ -1,0 +1,10 @@
+{
+    "experiment": "version2_run2",
+    "timestamp": "2026-01-10T22:31:06.881231",
+    "num_queries": 6,
+    "mean_p10": 0.48333333333333334,
+    "mean_ap10": 0.42693121693121694,
+    "mean_latency": 11527.952949206034,
+    "seed": 43,
+    "split_ratio": 0.8
+}

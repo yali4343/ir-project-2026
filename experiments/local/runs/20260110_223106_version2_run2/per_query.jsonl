@@ -1,0 +1,6 @@
+{"query": "Shakespeare plays Elizabethan theatre", "p10": 0.5, "ap10": 0.40714285714285714, "latency": 9804.994583129883, "num_retrieved": 100, "num_relevant": 49}
+{"query": "DNA double helix discovery", "p10": 0.7, "ap10": 0.6527777777777778, "latency": 8566.962003707886, "num_retrieved": 100, "num_relevant": 41}
+{"query": "Viking exploration North America", "p10": 0.1, "ap10": 0.025, "latency": 15554.429292678833, "num_retrieved": 100, "num_relevant": 45}
+{"query": "Green Revolution agriculture yield", "p10": 0.8, "ap10": 0.78, "latency": 9603.613376617432, "num_retrieved": 100, "num_relevant": 49}
+{"query": "Television invention broadcast media", "p10": 0.4, "ap10": 0.3416666666666667, "latency": 10950.736045837402, "num_retrieved": 100, "num_relevant": 49}
+{"query": "Great Fire of London 1666", "p10": 0.4, "ap10": 0.355, "latency": 14686.98239326477, "num_retrieved": 100, "num_relevant": 39}
