@@ -15,9 +15,21 @@ _ID_TO_TITLE = None
 _PAGERANK = None
 
 def get_storage_client():
+    """
+    Creates and returns a Google Cloud Storage client.
+    
+    Returns:
+        google.cloud.storage.Client: The GCS client.
+    """
     return storage.Client(project=Config.PROJECT_ID)
 
 def get_bucket():
+    """
+    Retrieves the GCS bucket object configured in Config.
+    
+    Returns:
+        google.cloud.storage.Bucket: The GCS bucket.
+    """
     client = get_storage_client()
     return client.bucket(Config.BUCKET_NAME)
 
@@ -25,6 +37,16 @@ def load_index(index_type):
     """
     Load an inverted index based on type ('text', 'title', 'anchor').
     Source controlled by INDEX_SOURCE env var ('local', 'gcs', 'auto').
+    
+    Args:
+        index_type (str): The type of index to load ('text', 'title', 'anchor').
+        
+    Returns:
+        InvertedIndex: The loaded inverted index object.
+        
+    Raises:
+        ValueError: If index_type is unknown.
+        RuntimeError: If loading fails when forced to GCS.
     """
     index_source = os.environ.get('INDEX_SOURCE', 'auto')
     
@@ -82,6 +104,15 @@ def load_index(index_type):
     return InvertedIndex()
 
 def load_pagerank():
+    """
+    Loads PageRank data from local file or GCS.
+    
+    Global variable _PAGERANK is used as cache.
+    
+    Returns:
+        dict: A dictionary mapping doc_id to PageRank score.
+              Returns empty dict if loading fails.
+    """
     global _PAGERANK
     if _PAGERANK is not None:
         return _PAGERANK
@@ -113,6 +144,14 @@ def load_pagerank():
             df = pd.read_csv(io.BytesIO(content), compression='gzip', header=None)
             _PAGERANK = dict(zip(df[0], df[1]))
             print(f"Loaded PageRank from GCS ({len(_PAGERANK)} entries).")
+    """
+    Loads page view data.
+    Currently prefers local file.
+    
+    Returns:
+        dict: A dictionary mapping doc_id to page views.
+              Returns empty dict if not found.
+    """
             return _PAGERANK
         except Exception as e:
             print(f"Error loading PageRank from GCS: {e}")
@@ -130,6 +169,16 @@ def load_pageviews():
         if os.path.exists(path):
             try:
                 with open(path, 'rb') as f:
+    """
+    Loads the mapping from document ID to title.
+    Supports loading from local pickle or GCS parquet files.
+    
+    Global variable _ID_TO_TITLE is used as cache.
+    
+    Returns:
+        dict: A dictionary mapping doc_id to title string.
+              Returns empty dict if loading fails.
+    """
                     return pickle.load(f)
             except:
                 pass

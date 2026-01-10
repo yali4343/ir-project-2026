@@ -1,5 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+  Search UI for the IR engine.
+  - JS: /static/js/app.js binds events and renders results.
+  - CSS: /static/css/style.css handles layout and theme.
+  
+  Key elements:
+  - #search-box: query input container
+  - #query: actual text input
+  - #search-btn: triggers search
+  - #results-list: container for result cards
+-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +20,7 @@
 </head>
 <body>
     <div class="main-container">
+        <!-- Header & Search Box -->
         <header class="search-header">
             <h1 class="logo">Search Engine</h1>
             <div class="search-box">
@@ -17,6 +29,7 @@
             </div>
         </header>
 
+        <!-- Results Area -->
         <main id="results-area">
             <div id="loading" class="hidden">Searching...</div>
             <ul id="results-list"></ul>

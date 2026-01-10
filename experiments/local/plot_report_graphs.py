@@ -12,6 +12,17 @@ GCP_AGG_DIR = os.path.join(os.path.dirname(BASE_DIR), "gcp", "aggregates")
 
 
 def plot_report_graphs():
+    """
+    Generates the final comparison graphs for the report.
+
+    Produces:
+    1. performance_comparison.png: Bar chart of Mean P@10 for local versions.
+    2. latency_comparison_gcp.png: Bar chart of Mean Latency for GCP versions.
+
+    Reads from:
+    - experiments/local/aggregates/*.json
+    - experiments/gcp/aggregates/*.json
+    """
     os.makedirs(PLOTS_DIR, exist_ok=True)
 
     # --- Graph F: Performance (P@10) per Version (Local Aggregates) ---

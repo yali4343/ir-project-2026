@@ -1,10 +1,18 @@
+/*
+ * Main Stylesheet for Search Engine UI
+ * Theme: Light mode, blue primary color, clean/modern look.
+ * Layout: Centered column with responsive search box.
+ */
+
 :root {
+    /* Color Palette */
     --primary-color: #2563eb;
     --bg-color: #f8fafc;
     --text-color: #1e293b;
     --card-bg: #ffffff;
 }
 
+/* === Base & Typography === */
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
@@ -14,12 +22,14 @@ body {
     line-height: 1.6;
 }
 
+/* === Layout === */
 .main-container {
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
 }
 
+/* === Header & Search Box === */
 .search-header {
     text-align: center;
     margin-bottom: 3rem;
@@ -69,6 +79,8 @@ button:hover {
     background-color: #1d4ed8;
 }
 
+/* === Results Section === */
+/* Styles for clickable result cards rendered by app.js */
 #results-list {
     list-style: none;
     padding: 0;

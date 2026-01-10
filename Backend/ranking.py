@@ -9,7 +9,15 @@ from config import Config
 
 def _get_posting_source(posting_list_dir):
     """
-    Helper to determine if we should read from local 'data/' or bucket.
+    Helper to determine if we should read posting lists from local 'data/' or GCS bucket.
+    
+    Args:
+        posting_list_dir (str): Relative directory name for postings (e.g. 'postings_gcp').
+        
+    Returns:
+        tuple: (base_dir, bucket_name)
+               - base_dir (str): Path to directory or GCS prefix.
+               - bucket_name (str): Name of GCS bucket or None if local.
     """
     base_dir = posting_list_dir
     bucket_name = Config.BUCKET_NAME
@@ -32,7 +40,16 @@ def _get_posting_source(posting_list_dir):
 def calculate_tfidf_score_with_dir(query_tokens, index, posting_list_dir):
     """
     Calculates TF-IDF cosine similarity for the query against the index.
-    Returns a list of (doc_id, score).
+    
+    Reads posting lists dynamically from disk or GCS.
+
+    Args:
+        query_tokens (list): List of token strings from the query.
+        index (InvertedIndex): The inverted index object containing statistics (df, posting_locs).
+        posting_list_dir (str): Directory where posting lists are stored.
+
+    Returns:
+        list: A list of tuples (doc_id, score) where score is the cosine similarity.
     """
     query_counter = Counter(query_tokens)
     query_norm = 0
@@ -68,6 +85,15 @@ def calculate_tfidf_score_with_dir(query_tokens, index, posting_list_dir):
             scores[doc_id] += w_iq * w_ij
 
     final_scores = []
+    Used for index elimination or simple boolean-like matching.
+
+    Args:
+        query_tokens (list): List of token strings from the query.
+        index (InvertedIndex): The inverted index object.
+        posting_list_dir (str): Directory where posting lists are stored.
+
+    Returns:
+        list: A list of tuples (doc_id, count) where count is the number of unique query terms present.
     for doc_id, score in scores.items():
         norm_score = score / query_norm
         final_scores.append((doc_id, norm_score))
