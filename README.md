@@ -11,10 +11,17 @@
 This service is a web-based search engine built to query a Wikipedia-like corpus. It provides a simple user interface and an HTTP API to retrieve relevant documents based on text queries.
 
 **Key Features:**
-- **Search Logic:** Supports TF-IDF, Cosine Similarity, and PageRank integration.
+- **Advanced Search Logic (Version 2):** Incorporates BM25 ranking, Word2Vec query expansion for weak queries, and efficient candidate limiting.
+- **Optimized Latency:** Uses heap-based top-K selection and two-stage retrieval to prevent latency spikes on broad queries.
 - **Hybrid Data Loading:** Capable of running locally with downloaded data or on a minimal GCP VM instance by streaming data directly from Google Cloud Storage (GCS) using `google-cloud-storage` and `pandas`.
 - **Frontend/Backend:** A Flask-based backend serving a clean HTML/JS frontend.
 - **Comprehensive Evaluation:** Includes a full suite of scripts for measuring precision, recall breakdown, and real-world latency.
+
+**Project Constraints Compliance:**
+1.  **Efficiency:** No query exceeds 35 seconds (Average latency ~9.7s locally for V2).
+2.  **No Result Caching:** Query results are computed on-the-fly. Only static data (indexes, PageRank) is loaded at startup.
+3.  **No External Services:** All indices and models (including Word2Vec) are local.
+4.  **Quality:** Mean AP@10 > 0.1 (Achieved ~0.423 with Version 2).
 
 ---
 
@@ -22,7 +29,7 @@ This service is a web-based search engine built to query a Wikipedia-like corpus
 
 ```
 ├── search_frontend.py          # Main Flask application and server entry point
-├── query_engine.py             # Orchestrates the search logic (Text Search + PageRank)
+├── query_engine.py             # Orchestrates the search logic (BM25 + PageRank + Expansion)
 ├── inverted_index_gcp.py       # Core class for handling Inverted Index IO (Read/Write)
 ├── config.py                   # Configuration attributes (GCS buckets, Paths)
 ├── requirements.txt            # Python dependencies
@@ -30,7 +37,9 @@ This service is a web-based search engine built to query a Wikipedia-like corpus
 ├── README_DEPLOY_VM.md         # Specific instructions for VM deployment
 ├── Backend/
 │   ├── data_Loader.py          # Module to load indexes, PageRank (CSV.gz), and mappings (Parquet)
-│   ├── ranking.py              # Implementation of scoring algorithms (TF-IDF, Term Count)
+│   ├── ranking.py              # Legacy scoring algorithms
+│   ├── ranking_v2.py           # Optimized BM25 & Heap-based scoring
+│   ├── semantic_expansion.py   # Word2Vec expansion logic
 │   └── tokenizer.py            # Text processing and tokenization logic
 ├── Frontend/
 │   ├── templates/index.html    # Main search page HTML
@@ -41,10 +50,9 @@ This service is a web-based search engine built to query a Wikipedia-like corpus
     ├── local/                  # Local Quality Evaluation
     │   ├── run_experiment.py   # Single run execution
     │   ├── run_suite.py        # Multi-run aggregation (Stability)
-    │   ├── plot_report_graphs.py # Generates performance graphs (Req. f, g)
-    │   ├── qualitative_eval.py # Generates qualitative report (Req. h)
-    │   ├── runs/               # Experiment run outputs
-    │   └── plots/              # Final graphs
+    │   ├── plot_report_graphs.py # Generates performance comparison graphs
+    │   ├── plots/              # Final graphs (performance_comparison.png)
+    │   └── aggregates/         # JSON results for Version 1 and Version 2
     └── gcp/                    # GCP Latency Evaluation
         └── measure_latency.py  # Script for measuring HTTP latency of deployed VM
 ```
@@ -54,13 +62,13 @@ This service is a web-based search engine built to query a Wikipedia-like corpus
 ## C. Architecture & Data Flow
 
 1.  **Request:** The user enters a query in the frontend, which sends a GET request to `/search?query=...`.
-2.  **Tokenization:** The backend receives the query and passes it to `Backend.tokenizer`, which filters stopwords and regex-matches words.
-3.  **Search & Ranking:**
-    *   `query_engine.py` calls `Backend.ranking` to calculate TF-IDF scores based on the body index.
-    *   Results are filtered (Index Elimination) based on unique term overlap (50% threshold).
-    *   PageRank is fetched for candidate documents and integrated into the final score.
-4.  **Mapping:** Resulting document IDs are mapped to titles using the loaded `id_to_title` dictionary.
-5.  **Response:** A JSON list of `[doc_id, title]` pairs is returned to the frontend for rendering.
+2.  **Tokenization:** The backend receives the query and passes it to `Backend.tokenizer`. Stopwords are filtered.
+3.  **Search & Ranking (Version 2 Pipeline):**
+    *   **Query Expansion:** Detailed checks trigger Word2Vec expansion for weak queries (<=2 tokens).
+    *   **Stage 1 (Candidate Limiting):** BM25 scores are calculated for relevant postings. A heap (`heapq.nlargest`) efficiently selects the top-N (e.g., 2000) candidates.
+    *   **Stage 2 (Re-ranking):** Only the top candidates are re-scored by integrating PageRank values.
+4.  **Mapping:** Resulting document IDs are mapped to titles using the loaded `id_to_title` dictionary only for the final top-100 results.
+5.  **Response:** A JSON list of `[doc_id, title]` pairs is returned to the frontend.
 
 **Data Source Modes:**
 The system uses an environment variable `INDEX_SOURCE` to determine where to load data from:
@@ -68,53 +76,58 @@ The system uses an environment variable `INDEX_SOURCE` to determine where to loa
 *   `gcs`: Forces loading from Google Cloud Storage (buckets).
 *   `local`: Forces loading from local disk only.
 
-*Note: Query results are computed on-the-fly and are not cached.*
+*Note: As per requirements, there is NO caching of query results. Static structures (Index, PageRank, ID map) are cached in memory at startup.*
 
 ---
 
 ## D. Backend Deep Dive
 
-### 1. `Backend/data_Loader.py`
-**Responsibility:** Handles the loading of static data structures (Indexes, PageRank, Mappings) into memory at startup.
+### 1. `query_engine.py` (Search Engine Core)
+**Responsibility:** Implements the Version 2 retrieval pipeline.
+*   **Startup:** Loads `text_index`, `pagerank`, `pageviews`, `id_to_title`, and the `Word2Vec` model.
+*   **Search Flow:**
+    *   Checks query length for expansion.
+    *   Calls `Backend.ranking_v2.get_candidate_documents` for efficient retrieval.
+    *   Normalizes scores and blends with PageRank (85% Text / 15% PR).
+    *   Returns top 100 results.
 
-*   **`load_index(index_type)`**: Loads the `InvertedIndex` object (`index.pkl`). If `INDEX_SOURCE=gcs`, it fetches the pickle from the configured GCS blob path.
-*   **`load_id_to_title()`**: Loads the mapping from Doc ID to Title. In GCS mode, it downloads multiple `.parquet` files from the bucket, reads them into Pandas DataFrames, and concatenates them into a single dictionary.
-*   **`load_pagerank()`**: Downloads a **gzipped CSV file** from GCS and parses it into a `{doc_id: rank}` dictionary.
-*   **`load_pageviews()`**: Optional. Returns an empty dictionary if the file is missing, preventing startup failures on minimal VMs.
+### 2. `Backend/ranking_v2.py`
+**Responsibility:** Optimized scoring for Version 2.
+*   **`get_candidate_documents`**: Computes BM25 scores. Handles missing DL stats gracefully (fallback to robust TF-IDF). Uses a min-heap to keep only the top-K candidates, avoiding expensive full sorts.
 
-### 2. `Backend/ranking.py`
-**Responsibility:** Implements the core mathematical scoring functions.
-
-*   **`_get_posting_source(posting_list_dir)`**: Determines the correct read path. If `INDEX_SOURCE=gcs`, it directs the reader to the bucket name.
-*   **`calculate_tfidf_score_with_dir(...)`**: Computes Cosine Similarity between the query and documents using TF-IDF weights. It reads posting lists efficiently using the `InvertedIndex` class.
-*   **`calculate_unique_term_count(...)`**: Counts how many unique query terms appear in each document. This is used for "Index Elimination".
-
-### 3. `Backend/tokenizer.py`
-**Responsibility:** Text processing.
-
-*   **`tokenize(text)`**: Uses regex `RE_WORD` to find words and filters out a frozen set of English stopwords.
+### 3. `Backend/data_Loader.py`
+**Responsibility:** Handles the loading of static data structures.
+*   **`load_index`**: Loads the Inverted Index.
+*   **`load_pagerank`**: Downloads/Parses PageRank CSV.
+*   **`load_id_to_title`**: Concatenates Parquet files from GCS into a lookup dict.
 
 ---
 
 ## E. Experiments & Evaluation
 
-The repository contains a full suite for generating the reports required for the project.
+We performed strict local and cloud-based evaluations to verify improvements.
 
-### 1. Quality Evaluation (Local)
-Scripts are located in `experiments/local/`.
-*   **Run Single Experiment:** `python experiments/local/run_experiment.py --experiment_name "v1_test"` (Calculates Mean P@10, AP@10).
-*   **Run Suite (Stability):** `python experiments/local/run_suite.py --version_name "baseline_v1"` (Runs multiple seeds and aggregates results).
-*   **Generate Graphs:** `python experiments/local/plot_report_graphs.py` (Creates `performance_comparison.png`).
+### Results Summary
+**Comparison (Version 1 Baseline -> Version 2):**
+*   **Quality (Mean Precision@10):** Improved from **~0.35** (v1) to **~0.528** (v2).
+*   **Quality (Mean AP@10):** Improved from **~0.269** (v1) to **~0.423** (v2).
+*   **Local Latency:** Average latency dropped by ~50% (~17.6s - 25.8s in v1 vs **~8.3s - 11.5s** in v2).
+*   **GCP Latency:** Averaged **~3.46s** on the deployed VM (see `latency_comparison_gcp.png`).
 
-### 2. Latency Evaluation (GCP)
-Scripts are located in `experiments/gcp/`.
-*   **Measure Latency:** `python experiments/gcp/measure_latency.py --base_url "http://<VM_IP>:8080"`
-    *   This pings the deployed VM and measures client-side HTTP response time.
-    *   Results are saved to `experiments/gcp/aggregates/` and plotted by the local plotting script.
+### Plots
+Visual comparisons generated by the suite are available in `experiments/local/plots/`:
+*   `performance_comparison.png`: Shows the significant jump in P@10 for Version 2.
+*   `latency_comparison.png`: Side-by-side latency reduction.
 
-### 3. Qualitative Evaluation
-*   **Generate Report:** `python experiments/local/qualitative_eval.py --run_path "experiments/local/runs/<timestamp>_run"`
-    *   Identifies best/worst queries and generates a Markdown template (`qualitative_report.md`) with the top 10 results for manual analysis.
+### Running the Evaluation
+To reproduce these results locally:
+```bash
+# Run the Version 2 Suite
+python experiments/local/run_suite.py --version_name "version2" --num_runs 3
+
+# Generate Plots
+python experiments/local/plot_report_graphs.py
+```
 
 ---
 
@@ -148,11 +161,4 @@ Access at `http://127.0.0.1:8080`.
 
 For detailed step-by-step VM deployment, see [README_DEPLOY_VM.md](README_DEPLOY_VM.md).
 
----
 
-## G. Troubleshooting
-
-*   **403 Forbidden (GCS):** Ensure the VM's Service Account has `Storage Object Viewer` role on `yali-ir2025-bucket`.
-*   **Pyarrow Error:** If loading mappings fails, ensure `pyarrow` is installed (`pip install pyarrow`).
-*   **Server Starts but Search Fails:** Check logs. If `INDEX_SOURCE` is not set to `gcs`, it might be looking for local files.
-*   **Connection Refused:** Verify the application is running (`ps aux | grep python`) and port 8080 is open in GCP Firewall rules.
